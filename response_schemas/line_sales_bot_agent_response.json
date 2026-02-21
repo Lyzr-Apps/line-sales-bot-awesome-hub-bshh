@@ -1,0 +1,34 @@
+{
+  "agent_name": "LINE Sales Bot Agent",
+  "agent_id": "6999b71917b4c5305ed706d4",
+  "description": "Handles customer-facing LINE conversations \u2014 answers product questions, provides recommendations from catalog data, guides purchase flow, collects order details for admin confirmation. Uses product catalog and conversation history from PostgreSQL.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "response_text": "string",
+    "intent": "string",
+    "products_mentioned": [
+      {
+        "name": "string",
+        "price": "string",
+        "availability": "string"
+      }
+    ],
+    "order_collected": "boolean",
+    "order_summary": "string"
+  },
+  "example_response": {
+    "response_text": "The chatbot reply message to send to the customer",
+    "intent": "Detected customer intent: inquiry, recommendation, purchase, faq, complaint, greeting, other",
+    "products_mentioned": [
+      {
+        "name": "sample string",
+        "price": "sample string",
+        "availability": "sample string"
+      }
+    ],
+    "order_collected": false,
+    "order_summary": "Summary of the order if one was collected, empty string otherwise"
+  }
+}

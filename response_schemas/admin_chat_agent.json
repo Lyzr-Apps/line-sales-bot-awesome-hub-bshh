@@ -1,0 +1,44 @@
+{
+  "agent_id": "6999b71afdb12766dbc0177e",
+  "agent_name": "Admin Chat Agent",
+  "agent_type": "json",
+  "has_module_outputs": false,
+  "accessor": "result.response.result.{field_name}",
+  "response_schema": {
+    "type": "json_schema",
+    "json_schema": {
+      "name": "AdminChatAgentResponse",
+      "strict": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "draft_reply": {
+            "type": "string",
+            "description": "Suggested reply text for the admin to send to the customer"
+          },
+          "tone": {
+            "type": "string",
+            "description": "The tone of the draft: professional, empathetic, apologetic, informational, casual"
+          },
+          "suggested_actions": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "List of follow-up actions the admin might want to take"
+          },
+          "context_notes": {
+            "type": "string",
+            "description": "Notes about the conversation context and customer situation for the admin"
+          },
+          "confidence": {
+            "type": "string",
+            "description": "Confidence level in the suggested draft: high, medium, low"
+          }
+        },
+        "required": ["draft_reply", "tone", "suggested_actions", "context_notes", "confidence"],
+        "additionalProperties": false
+      }
+    }
+  }
+}

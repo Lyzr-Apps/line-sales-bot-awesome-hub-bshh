@@ -1,0 +1,28 @@
+{
+  "workflow_id": "line_sales_chatbot_with_admin_dashboard",
+  "status": "created",
+  "agents": {
+    "line_sales_bot_agent": {
+      "agent_id": "6999b71917b4c5305ed706d4",
+      "name": "LINE Sales Bot Agent",
+      "type": "independent",
+      "model": "gpt-4.1",
+      "provider": "openai",
+      "temperature": 0.4,
+      "top_p": 0.95
+    },
+    "admin_chat_agent": {
+      "agent_id": "6999b71afdb12766dbc0177e",
+      "name": "Admin Chat Agent",
+      "type": "independent",
+      "model": "gpt-4.1",
+      "provider": "openai",
+      "temperature": 0.5,
+      "top_p": 0.95
+    }
+  },
+  "agent_ids": [
+    "6999b71917b4c5305ed706d4",
+    "6999b71afdb12766dbc0177e"
+  ]
+}

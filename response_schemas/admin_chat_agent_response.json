@@ -1,0 +1,26 @@
+{
+  "agent_name": "Admin Chat Agent",
+  "agent_id": "6999b71afdb12766dbc0177e",
+  "description": "Assists admin in manually responding to LINE users when bot is paused. Suggests reply drafts based on conversation history and user profile context, which admin can edit before sending via LINE API.",
+  "agent_type": "json",
+  "accessor": "result",
+  "auto_generated": true,
+  "response_schema": {
+    "draft_reply": "string",
+    "tone": "string",
+    "suggested_actions": [
+      "string"
+    ],
+    "context_notes": "string",
+    "confidence": "string"
+  },
+  "example_response": {
+    "draft_reply": "Suggested reply text for the admin to send to the customer",
+    "tone": "The tone of the draft: professional, empathetic, apologetic, informational, casual",
+    "suggested_actions": [
+      "sample string"
+    ],
+    "context_notes": "Notes about the conversation context and customer situation for the admin",
+    "confidence": "Confidence level in the suggested draft: high, medium, low"
+  }
+}

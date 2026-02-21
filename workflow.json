@@ -1,0 +1,16 @@
+{
+  "agents": [
+    {
+      "id": "6999b71917b4c5305ed706d4",
+      "name": "LINE Sales Bot Agent",
+      "type": "independent",
+      "description": "Handles customer-facing LINE conversations"
+    },
+    {
+      "id": "6999b71afdb12766dbc0177e",
+      "name": "Admin Chat Agent",
+      "type": "independent",
+      "description": "Assists admin in manually responding to LINE users"
+    }
+  ]
+}
