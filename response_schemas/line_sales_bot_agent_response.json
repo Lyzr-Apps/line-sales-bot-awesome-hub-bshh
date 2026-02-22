@@ -1,7 +1,7 @@
 {
   "agent_name": "LINE Sales Bot Agent",
-  "agent_id": "6999b71917b4c5305ed706d4",
-  "description": "Handles customer-facing LINE conversations \u2014 answers product questions, provides recommendations from catalog data, guides purchase flow, collects order details for admin confirmation. Uses product catalog and conversation history from PostgreSQL.",
+  "agent_id": "699a8f14e6195f9129d6b924",
+  "description": "Handles customer-facing LINE conversations \u2014 answers product questions using product catalog from Knowledge Base, provides recommendations, guides purchase flow, collects order details for admin confirmation.",
   "agent_type": "json",
   "accessor": "result",
   "auto_generated": true,
@@ -29,6 +29,6 @@
       }
     ],
     "order_collected": false,
-    "order_summary": "Summary of the order if one was collected, empty string otherwise"
+    "order_summary": "Summary of the order if collected, empty string otherwise"
   }
 }

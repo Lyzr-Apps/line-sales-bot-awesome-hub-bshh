@@ -1,10 +1,12 @@
 {
   "agents": [
     {
-      "id": "6999b71917b4c5305ed706d4",
+      "id": "699a8f14e6195f9129d6b924",
       "name": "LINE Sales Bot Agent",
       "type": "independent",
-      "description": "Handles customer-facing LINE conversations"
+      "description": "Handles customer-facing LINE conversations with Knowledge Base for product catalog",
+      "has_knowledge_base": true,
+      "rag_id": "699a8efd3dc9e9e5282826a4"
     },
     {
       "id": "6999b71afdb12766dbc0177e",

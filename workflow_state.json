@@ -3,13 +3,16 @@
   "status": "created",
   "agents": {
     "line_sales_bot_agent": {
-      "agent_id": "6999b71917b4c5305ed706d4",
+      "agent_id": "699a8f14e6195f9129d6b924",
       "name": "LINE Sales Bot Agent",
       "type": "independent",
       "model": "gpt-4.1",
       "provider": "openai",
       "temperature": 0.4,
-      "top_p": 0.95
+      "top_p": 0.95,
+      "has_knowledge_base": true,
+      "rag_id": "699a8efd3dc9e9e5282826a4",
+      "rag_name": "linesalesproductcatalog7uzx"
     },
     "admin_chat_agent": {
       "agent_id": "6999b71afdb12766dbc0177e",
@@ -22,7 +25,14 @@
     }
   },
   "agent_ids": [
-    "6999b71917b4c5305ed706d4",
+    "699a8f14e6195f9129d6b924",
     "6999b71afdb12766dbc0177e"
-  ]
+  ],
+  "knowledge_bases": {
+    "product_catalog": {
+      "rag_id": "699a8efd3dc9e9e5282826a4",
+      "rag_name": "linesalesproductcatalog7uzx",
+      "used_by": "line_sales_bot_agent"
+    }
+  }
 }

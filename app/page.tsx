@@ -3,6 +3,10 @@
 import { useState, useCallback, useEffect } from 'react'
 import { callAIAgent } from '@/lib/aiAgent'
 import { cn } from '@/lib/utils'
+import {
+  getDocuments, uploadAndTrainDocument, deleteDocuments, validateFile,
+  useRAGKnowledgeBase, type RAGDocument
+} from '@/lib/ragKnowledgeBase'
 import { Button } from '@/components/ui/button'
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -26,7 +30,8 @@ import {
   Home, MessageSquare, Package, FileText, Users, Send, BarChart3, Settings, Search, Bell,
   ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Bot, User, Plus, Edit, Trash2,
   X, Check, Loader2, Eye, Filter, ArrowUp, ArrowDown, Clock, ShoppingCart, DollarSign,
-  AlertCircle, Info, Menu, ChevronDown, RefreshCw, Download, Mail, Sparkles, Hash, Star
+  AlertCircle, Info, Menu, ChevronDown, RefreshCw, Download, Mail, Sparkles, Hash, Star,
+  Upload, File, Database
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -34,8 +39,9 @@ import {
 } from 'recharts'
 
 // ============ CONSTANTS ============
-const LINE_SALES_BOT_ID = '6999b71917b4c5305ed706d4'
+const LINE_SALES_BOT_ID = '699a8f14e6195f9129d6b924'
 const ADMIN_CHAT_AGENT_ID = '6999b71afdb12766dbc0177e'
+const RAG_ID = '699a8efd3dc9e9e5282826a4'
 
 // ============ THEME COLORS ============
 const theme = {
@@ -216,6 +222,43 @@ export default function Page() {
   // Analytics state
   const [analyticsRange, setAnalyticsRange] = useState('month')
   const [exportSuccess, setExportSuccess] = useState(false)
+
+  // Knowledge Base state
+  const { documents: kbDocuments, loading: kbLoading, error: kbError, fetchDocuments: kbFetchDocuments, uploadDocument: kbUploadDocument, removeDocuments: kbRemoveDocuments } = useRAGKnowledgeBase()
+  const [kbUploading, setKbUploading] = useState(false)
+
+  // Load KB documents on mount
+  useEffect(() => {
+    kbFetchDocuments(RAG_ID)
+  }, [])
+
+  const handleKBFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const validation = validateFile(file)
+    if (!validation.valid) {
+      showStatus(validation.error || 'Invalid file type', 'error')
+      return
+    }
+    setKbUploading(true)
+    const result = await kbUploadDocument(RAG_ID, file)
+    if (result.success) {
+      showStatus('Document uploaded and training started. The AI bot will use this data to answer customer questions.')
+    } else {
+      showStatus(result.error || 'Upload failed', 'error')
+    }
+    setKbUploading(false)
+    e.target.value = ''
+  }
+
+  const handleKBDeleteDoc = async (fileName: string) => {
+    const result = await kbRemoveDocuments(RAG_ID, [fileName])
+    if (result.success) {
+      showStatus('Document removed from knowledge base')
+    } else {
+      showStatus(result.error || 'Delete failed', 'error')
+    }
+  }
 
   const showStatus = useCallback((text: string, type: StatusMsg['type'] = 'success') => {
     setStatusMessage({ text, type })
@@ -885,6 +928,111 @@ export default function Page() {
                   </Card>
                 ))}
               </div>
+
+              {/* Knowledge Base - Product Catalog Documents */}
+              <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <span className="p-2 rounded-lg" style={{ backgroundColor: theme.accent + '20' }}>
+                        <Database size={18} style={{ color: theme.accent }} />
+                      </span>
+                      <div>
+                        <CardTitle className="text-base font-semibold">Product Catalog Knowledge Base</CardTitle>
+                        <CardDescription style={{ color: theme.mutedFg }}>
+                          Upload product documents (PDF, DOCX, TXT) - the AI bot will use this data to answer customer questions
+                        </CardDescription>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button size="sm" variant="outline" onClick={() => kbFetchDocuments(RAG_ID)}
+                        disabled={kbLoading}
+                        style={{ borderColor: theme.border, color: theme.mutedFg }}>
+                        <RefreshCw size={14} className={cn('mr-1.5', kbLoading && 'animate-spin')} /> Refresh
+                      </Button>
+                      <label>
+                        <input type="file" accept=".pdf,.docx,.txt" className="hidden" onChange={handleKBFileUpload} disabled={kbUploading} />
+                        <Button size="sm" asChild disabled={kbUploading}
+                          style={{ backgroundColor: theme.accent, color: theme.bg, cursor: 'pointer' }}>
+                          <span>
+                            {kbUploading ? <Loader2 size={14} className="mr-1.5 animate-spin" /> : <Upload size={14} className="mr-1.5" />}
+                            Upload Document
+                          </span>
+                        </Button>
+                      </label>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  {kbLoading && !kbDocuments ? (
+                    <div className="space-y-2">
+                      <Skeleton className="h-12 w-full" style={{ backgroundColor: theme.muted }} />
+                      <Skeleton className="h-12 w-full" style={{ backgroundColor: theme.muted }} />
+                    </div>
+                  ) : Array.isArray(kbDocuments) && kbDocuments.length > 0 ? (
+                    <div className="space-y-2">
+                      {kbDocuments.map((doc, i) => (
+                        <div key={doc.fileName || i} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: theme.secondary }}>
+                          <div className="flex items-center gap-3">
+                            <File size={18} style={{ color: theme.accent }} />
+                            <div>
+                              <p className="text-sm font-medium">{doc.fileName}</p>
+                              <p className="text-xs" style={{ color: theme.mutedFg }}>
+                                {doc.fileType?.toUpperCase()}
+                                {doc.uploadedAt ? ` - Uploaded ${new Date(doc.uploadedAt).toLocaleDateString()}` : ''}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {doc.status && (
+                              <Badge variant="outline" className="text-[10px]" style={{
+                                borderColor: doc.status === 'active' ? theme.chart2 : doc.status === 'processing' ? '#d97706' : theme.destructive,
+                                color: doc.status === 'active' ? theme.chart2 : doc.status === 'processing' ? '#d97706' : theme.destructive,
+                              }}>
+                                {doc.status === 'active' ? 'Trained' : doc.status === 'processing' ? 'Training...' : doc.status}
+                              </Badge>
+                            )}
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '28px', width: '28px', padding: 0 }}>
+                                  <Trash2 size={14} />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent style={{ backgroundColor: theme.card, borderColor: theme.border }}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Remove {doc.fileName}?</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: theme.mutedFg }}>
+                                    The AI bot will no longer have access to this product data when answering customer questions.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel style={{ borderColor: theme.border, color: theme.fg }}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleKBDeleteDoc(doc.fileName)} style={{ backgroundColor: theme.destructive, color: '#fff' }}>Remove</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-8 space-y-3">
+                      <Database size={40} style={{ color: theme.muted }} />
+                      <div className="text-center">
+                        <p className="text-sm font-medium" style={{ color: theme.mutedFg }}>No documents uploaded yet</p>
+                        <p className="text-xs mt-1" style={{ color: theme.mutedFg }}>
+                          Upload a product catalog document (PDF, DOCX, or TXT) so the AI bot can reference real product data when chatting with customers.
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                  {kbError && (
+                    <div className="flex items-center gap-2 mt-3 p-2 rounded-lg text-xs" style={{ backgroundColor: theme.destructive + '15', color: theme.destructive }}>
+                      <AlertCircle size={14} /> {kbError}
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
 
               {/* Product Dialog */}
               <Dialog open={productDialog} onOpenChange={setProductDialog}>
