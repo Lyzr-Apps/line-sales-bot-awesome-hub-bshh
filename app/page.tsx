@@ -875,72 +875,57 @@ export default function Page() {
           {activeScreen === 'products' && (
             <div className="space-y-6 max-w-7xl mx-auto">
               <div className="flex items-center justify-between">
-                <h1 className="text-2xl font-bold">Products</h1>
+                <div>
+                  <h1 className="text-2xl font-bold">Products & Knowledge Base</h1>
+                  <p className="text-sm mt-1" style={{ color: theme.mutedFg }}>
+                    Manage your product catalog and the AI knowledge base that powers customer responses
+                  </p>
+                </div>
                 <Button onClick={() => { setEditingProduct(null); setProductForm({ name: '', description: '', price: '', category: 'Electronics', stock: '', imageUrl: '' }); setProductDialog(true) }}
                   style={{ backgroundColor: theme.accent, color: theme.bg }}>
                   <Plus size={16} className="mr-2" /> Add Product
                 </Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                {products.map(product => (
-                  <Card key={product.id} className="border-0 overflow-hidden" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
-                    <div className="h-36 flex items-center justify-center" style={{ backgroundColor: theme.secondary }}>
-                      <Package size={40} style={{ color: theme.muted }} />
+              {/* How It Works - Data Flow */}
+              <Card className="border-0" style={{ backgroundColor: theme.accent + '08', borderRadius: '0.75rem', border: `1px solid ${theme.accent}25` }}>
+                <CardContent className="py-4 px-5">
+                  <div className="flex items-center gap-6 text-xs overflow-x-auto">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Upload size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>Admin uploads product docs</span>
                     </div>
-                    <CardContent className="p-4 space-y-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <h3 className="text-sm font-semibold">{product.name}</h3>
-                          <p className="text-xs mt-0.5" style={{ color: theme.mutedFg }}>{product.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-lg font-bold" style={{ color: theme.accent }}>฿{product.price.toLocaleString()}</span>
-                        {stockBadge(product.stock)}
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <Badge variant="outline" className="text-[11px]" style={{ borderColor: theme.border, color: theme.mutedFg }}>{product.category}</Badge>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => handleEditProduct(product)} style={{ color: theme.mutedFg, height: '28px', width: '28px', padding: 0 }}>
-                            <Edit size={14} />
-                          </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '28px', width: '28px', padding: 0 }}>
-                                <Trash2 size={14} />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent style={{ backgroundColor: theme.card, borderColor: theme.border }}>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete {product.name}?</AlertDialogTitle>
-                                <AlertDialogDescription style={{ color: theme.mutedFg }}>This action cannot be undone.</AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel style={{ borderColor: theme.border, color: theme.fg }}>Cancel</AlertDialogCancel>
-                                <AlertDialogAction onClick={() => handleDeleteProduct(product.id)} style={{ backgroundColor: theme.destructive, color: '#fff' }}>Delete</AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Database size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>Knowledge Base trains on data</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Bot size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>AI bot searches KB for answers</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><MessageSquare size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>Customer gets accurate info</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
 
               {/* Knowledge Base - Product Catalog Documents */}
               <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
                 <CardHeader className="pb-3">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <span className="p-2 rounded-lg" style={{ backgroundColor: theme.accent + '20' }}>
-                        <Database size={18} style={{ color: theme.accent }} />
+                      <span className="p-2.5 rounded-lg" style={{ backgroundColor: theme.accent + '20' }}>
+                        <Database size={20} style={{ color: theme.accent }} />
                       </span>
                       <div>
                         <CardTitle className="text-base font-semibold">Product Catalog Knowledge Base</CardTitle>
                         <CardDescription style={{ color: theme.mutedFg }}>
-                          Upload product documents (PDF, DOCX, TXT) - the AI bot will use this data to answer customer questions
+                          Documents the AI bot uses to answer product questions from customers
                         </CardDescription>
                       </div>
                     </div>
@@ -963,38 +948,66 @@ export default function Page() {
                     </div>
                   </div>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="space-y-4">
+                  {/* Document List */}
                   {kbLoading && !kbDocuments ? (
                     <div className="space-y-2">
-                      <Skeleton className="h-12 w-full" style={{ backgroundColor: theme.muted }} />
-                      <Skeleton className="h-12 w-full" style={{ backgroundColor: theme.muted }} />
+                      <Skeleton className="h-14 w-full" style={{ backgroundColor: theme.muted }} />
+                      <Skeleton className="h-14 w-full" style={{ backgroundColor: theme.muted }} />
                     </div>
                   ) : Array.isArray(kbDocuments) && kbDocuments.length > 0 ? (
                     <div className="space-y-2">
+                      <div className="flex items-center justify-between px-1 mb-1">
+                        <span className="text-xs font-medium" style={{ color: theme.mutedFg }}>
+                          {kbDocuments.length} document{kbDocuments.length !== 1 ? 's' : ''} in knowledge base
+                        </span>
+                        <Badge style={{ backgroundColor: theme.chart2 + '20', color: theme.chart2 }} className="text-[10px]">
+                          AI Active
+                        </Badge>
+                      </div>
                       {kbDocuments.map((doc, i) => (
-                        <div key={doc.fileName || i} className="flex items-center justify-between p-3 rounded-lg" style={{ backgroundColor: theme.secondary }}>
-                          <div className="flex items-center gap-3">
-                            <File size={18} style={{ color: theme.accent }} />
-                            <div>
-                              <p className="text-sm font-medium">{doc.fileName}</p>
-                              <p className="text-xs" style={{ color: theme.mutedFg }}>
-                                {doc.fileType?.toUpperCase()}
-                                {doc.uploadedAt ? ` - Uploaded ${new Date(doc.uploadedAt).toLocaleDateString()}` : ''}
-                              </p>
+                        <div key={doc.fileName || i} className="flex items-center justify-between p-3.5 rounded-lg" style={{ backgroundColor: theme.secondary }}>
+                          <div className="flex items-center gap-3 min-w-0 flex-1">
+                            <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: theme.muted }}>
+                              <File size={18} style={{ color: theme.accent }} />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">{doc.fileName}</p>
+                              <div className="flex items-center gap-2 mt-0.5">
+                                <span className="text-[11px]" style={{ color: theme.mutedFg }}>
+                                  {doc.fileType?.toUpperCase() || 'DOC'}
+                                </span>
+                                {doc.fileSize && (
+                                  <>
+                                    <span className="text-[10px]" style={{ color: theme.border }}>|</span>
+                                    <span className="text-[11px]" style={{ color: theme.mutedFg }}>
+                                      {(doc.fileSize / 1024).toFixed(1)} KB
+                                    </span>
+                                  </>
+                                )}
+                                {doc.uploadedAt && (
+                                  <>
+                                    <span className="text-[10px]" style={{ color: theme.border }}>|</span>
+                                    <span className="text-[11px]" style={{ color: theme.mutedFg }}>
+                                      {new Date(doc.uploadedAt).toLocaleDateString()}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-2 shrink-0 ml-3">
                             {doc.status && (
                               <Badge variant="outline" className="text-[10px]" style={{
                                 borderColor: doc.status === 'active' ? theme.chart2 : doc.status === 'processing' ? '#d97706' : theme.destructive,
                                 color: doc.status === 'active' ? theme.chart2 : doc.status === 'processing' ? '#d97706' : theme.destructive,
                               }}>
-                                {doc.status === 'active' ? 'Trained' : doc.status === 'processing' ? 'Training...' : doc.status}
+                                {doc.status === 'active' ? 'Trained - AI can use' : doc.status === 'processing' ? 'Training...' : doc.status}
                               </Badge>
                             )}
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '28px', width: '28px', padding: 0 }}>
+                                <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '30px', width: '30px', padding: 0 }}>
                                   <Trash2 size={14} />
                                 </Button>
                               </AlertDialogTrigger>
@@ -1002,7 +1015,7 @@ export default function Page() {
                                 <AlertDialogHeader>
                                   <AlertDialogTitle>Remove {doc.fileName}?</AlertDialogTitle>
                                   <AlertDialogDescription style={{ color: theme.mutedFg }}>
-                                    The AI bot will no longer have access to this product data when answering customer questions.
+                                    The AI bot will no longer have access to product data in this file when answering customer questions.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -1016,23 +1029,176 @@ export default function Page() {
                       ))}
                     </div>
                   ) : (
-                    <div className="flex flex-col items-center justify-center py-8 space-y-3">
-                      <Database size={40} style={{ color: theme.muted }} />
-                      <div className="text-center">
-                        <p className="text-sm font-medium" style={{ color: theme.mutedFg }}>No documents uploaded yet</p>
-                        <p className="text-xs mt-1" style={{ color: theme.mutedFg }}>
-                          Upload a product catalog document (PDF, DOCX, or TXT) so the AI bot can reference real product data when chatting with customers.
+                    <div className="flex flex-col items-center justify-center py-10 space-y-3 rounded-lg" style={{ backgroundColor: theme.secondary }}>
+                      <Database size={44} style={{ color: theme.muted }} />
+                      <div className="text-center max-w-sm">
+                        <p className="text-sm font-medium">No documents uploaded yet</p>
+                        <p className="text-xs mt-1.5" style={{ color: theme.mutedFg }}>
+                          Upload your product catalog as a PDF, DOCX, or TXT file. The AI bot will train on this data and use it to answer customer questions accurately.
                         </p>
                       </div>
                     </div>
                   )}
                   {kbError && (
-                    <div className="flex items-center gap-2 mt-3 p-2 rounded-lg text-xs" style={{ backgroundColor: theme.destructive + '15', color: theme.destructive }}>
-                      <AlertCircle size={14} /> {kbError}
+                    <div className="flex items-center gap-2 p-3 rounded-lg text-xs" style={{ backgroundColor: theme.destructive + '15', color: theme.destructive }}>
+                      <AlertCircle size={14} className="shrink-0" /> {kbError}
                     </div>
                   )}
                 </CardContent>
               </Card>
+
+              {/* Document Format Guide */}
+              <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="p-2.5 rounded-lg" style={{ backgroundColor: theme.chart5 + '20' }}>
+                      <Info size={20} style={{ color: theme.chart5 }} />
+                    </span>
+                    <div>
+                      <CardTitle className="text-base font-semibold">Recommended Document Format</CardTitle>
+                      <CardDescription style={{ color: theme.mutedFg }}>
+                        Use this format so the AI bot can accurately retrieve and present product information
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    {/* Format Example */}
+                    <div className="rounded-lg overflow-hidden" style={{ border: `1px solid ${theme.border}` }}>
+                      <div className="px-4 py-2.5 flex items-center gap-2" style={{ backgroundColor: theme.secondary }}>
+                        <FileText size={14} style={{ color: theme.accent }} />
+                        <span className="text-xs font-semibold" style={{ color: theme.accent }}>product_catalog.txt - Example</span>
+                      </div>
+                      <div className="p-4" style={{ backgroundColor: theme.bg }}>
+                        <pre className="text-xs leading-relaxed whitespace-pre-wrap font-mono" style={{ color: theme.mutedFg }}>
+{`===========================
+Product: Wireless Earbuds Pro
+SKU: WEP-001
+Category: Electronics
+Price: 1,290 THB
+Stock: 45 units
+Status: In Stock
+Description: Premium noise-cancelling
+wireless earbuds with 24-hour battery
+life. Features Bluetooth 5.3, IPX5
+water resistance, and touch controls.
+Colors: Black, White, Midnight Green
+===========================
+Product: Smart Watch Pro
+SKU: SWP-002
+Category: Electronics
+Price: 3,490 THB
+Stock: 12 units
+Status: In Stock
+Description: Fitness tracking smartwatch
+with heart rate monitor, GPS, sleep
+tracking, and 7-day battery life.
+Colors: Silver, Black
+===========================`}
+                        </pre>
+                      </div>
+                    </div>
+
+                    {/* Field Guide */}
+                    <div className="space-y-3">
+                      <p className="text-xs font-medium" style={{ color: theme.mutedFg }}>
+                        Required fields per product for best AI responses:
+                      </p>
+                      <div className="space-y-2">
+                        {[
+                          { field: 'Product Name', desc: 'Full product name the customer might search for', required: true },
+                          { field: 'SKU / Product ID', desc: 'Unique identifier for order tracking', required: true },
+                          { field: 'Category', desc: 'Product category (Electronics, Fashion, etc.)', required: true },
+                          { field: 'Price', desc: 'Price in THB with currency label', required: true },
+                          { field: 'Stock / Availability', desc: 'Current stock count or In Stock / Out of Stock', required: true },
+                          { field: 'Description', desc: 'Detailed product features, specs, materials', required: true },
+                          { field: 'Colors / Variants', desc: 'Available options customers can choose', required: false },
+                          { field: 'Shipping Info', desc: 'Delivery time, weight, shipping restrictions', required: false },
+                        ].map((item, idx) => (
+                          <div key={idx} className="flex items-start gap-2 p-2 rounded" style={{ backgroundColor: theme.secondary }}>
+                            <div className="mt-0.5 shrink-0">
+                              {item.required ? (
+                                <Check size={12} style={{ color: theme.chart2 }} />
+                              ) : (
+                                <span className="w-3 h-3 flex items-center justify-center text-[8px]" style={{ color: theme.mutedFg }}>--</span>
+                              )}
+                            </div>
+                            <div>
+                              <span className="text-xs font-medium">{item.field}</span>
+                              {item.required && <span className="text-[9px] ml-1" style={{ color: theme.chart2 }}>required</span>}
+                              <p className="text-[11px] mt-0.5" style={{ color: theme.mutedFg }}>{item.desc}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="p-3 rounded-lg space-y-1.5" style={{ backgroundColor: theme.accent + '10', border: `1px solid ${theme.accent}20` }}>
+                        <p className="text-xs font-medium" style={{ color: theme.accent }}>Tips for best results:</p>
+                        <ul className="text-[11px] space-y-1" style={{ color: theme.mutedFg }}>
+                          <li>- Separate each product with a clear divider (=== or ---)</li>
+                          <li>- Use consistent field names across all products</li>
+                          <li>- Include the price with currency (THB)</li>
+                          <li>- Supported formats: PDF, DOCX, TXT</li>
+                          <li>- You can upload multiple files for different categories</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Product Cards Grid (visual reference) */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-base font-semibold">Product Display Reference</h2>
+                  <span className="text-xs" style={{ color: theme.mutedFg }}>Visual reference - upload documents above for AI data</span>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                  {products.map(product => (
+                    <Card key={product.id} className="border-0 overflow-hidden" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                      <div className="h-32 flex items-center justify-center" style={{ backgroundColor: theme.secondary }}>
+                        <Package size={36} style={{ color: theme.muted }} />
+                      </div>
+                      <CardContent className="p-4 space-y-2.5">
+                        <div>
+                          <h3 className="text-sm font-semibold">{product.name}</h3>
+                          <p className="text-xs mt-0.5" style={{ color: theme.mutedFg }}>{product.description}</p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-base font-bold" style={{ color: theme.accent }}>฿{product.price.toLocaleString()}</span>
+                          {stockBadge(product.stock)}
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <Badge variant="outline" className="text-[11px]" style={{ borderColor: theme.border, color: theme.mutedFg }}>{product.category}</Badge>
+                          <div className="flex gap-1">
+                            <Button size="sm" variant="ghost" onClick={() => handleEditProduct(product)} style={{ color: theme.mutedFg, height: '28px', width: '28px', padding: 0 }}>
+                              <Edit size={14} />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '28px', width: '28px', padding: 0 }}>
+                                  <Trash2 size={14} />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent style={{ backgroundColor: theme.card, borderColor: theme.border }}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Delete {product.name}?</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: theme.mutedFg }}>This action cannot be undone.</AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel style={{ borderColor: theme.border, color: theme.fg }}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteProduct(product.id)} style={{ backgroundColor: theme.destructive, color: '#fff' }}>Delete</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
 
               {/* Product Dialog */}
               <Dialog open={productDialog} onOpenChange={setProductDialog}>
