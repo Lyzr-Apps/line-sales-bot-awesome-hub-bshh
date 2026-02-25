@@ -31,7 +31,7 @@ import {
   ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Bot, User, Plus, Edit, Trash2,
   X, Check, Loader2, Eye, Filter, ArrowUp, ArrowDown, Clock, ShoppingCart, DollarSign,
   AlertCircle, Info, Menu, ChevronDown, RefreshCw, Download, Mail, Sparkles, Hash, Star,
-  Upload, File, Database
+  Upload, File, Database, Globe, Link2, Copy, Wifi, WifiOff, Unplug
 } from 'lucide-react'
 import {
   AreaChart, Area, BarChart, Bar, LineChart, Line,
@@ -296,6 +296,17 @@ export default function Page() {
   const { documents: kbDocuments, loading: kbLoading, error: kbError, fetchDocuments: kbFetchDocuments, uploadDocument: kbUploadDocument, removeDocuments: kbRemoveDocuments } = useRAGKnowledgeBase()
   const [kbUploading, setKbUploading] = useState(false)
 
+  // Channels state
+  const [channels, setChannels] = useState<ConnectedChannel[]>(initialChannels)
+  const [channelDialog, setChannelDialog] = useState(false)
+  const [channelSettingsId, setChannelSettingsId] = useState<string | null>(null)
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformType | null>(null)
+  const [channelForm, setChannelForm] = useState<Record<string, string>>({})
+  const [channelName, setChannelName] = useState('')
+  const [channelTestLoading, setChannelTestLoading] = useState(false)
+  const [showSecrets, setShowSecrets] = useState<Record<string, boolean>>({})
+  const [convChannelFilter, setConvChannelFilter] = useState('all')
+
   // Load KB documents on mount
   useEffect(() => {
     kbFetchDocuments(RAG_ID)
@@ -462,14 +473,109 @@ export default function Page() {
     showStatus(`Order ${orderId} rejected`)
   }
 
+  // ============ CHANNEL HANDLERS ============
+  const channelsByPlatform = (platform: PlatformType) => channels.filter(c => c.platform === platform)
+  const currentPlatformConfig = selectedPlatform ? platformConfigs.find(p => p.platform === selectedPlatform) : null
+
+  const getChannelInfo = (channelId: string) => {
+    const ch = channels.find(c => c.id === channelId)
+    if (!ch) return null
+    const pc = platformConfigs.find(p => p.platform === ch.platform)
+    return { channel: ch, platform: pc }
+  }
+
+  const openAddChannel = () => {
+    setSelectedPlatform(null)
+    setChannelForm({})
+    setChannelName('')
+    setChannelSettingsId(null)
+    setShowSecrets({})
+    setChannelDialog(true)
+  }
+
+  const openChannelSettings = (channel: ConnectedChannel) => {
+    setSelectedPlatform(channel.platform)
+    setChannelForm(channel.config)
+    setChannelName(channel.name)
+    setChannelSettingsId(channel.id)
+    setShowSecrets({})
+    setChannelDialog(true)
+  }
+
+  const handleSelectPlatform = (platform: PlatformType) => {
+    setSelectedPlatform(platform)
+    setChannelForm({})
+  }
+
+  const handleSaveChannel = () => {
+    if (!selectedPlatform || !channelName.trim()) return
+    if (channelSettingsId) {
+      setChannels(prev => prev.map(c => c.id === channelSettingsId ? { ...c, name: channelName, config: channelForm, platform: selectedPlatform } : c))
+      showStatus('Channel settings updated')
+    } else {
+      const newChannel: ConnectedChannel = {
+        id: `ch${Date.now()}`,
+        platform: selectedPlatform,
+        name: channelName,
+        status: 'connected',
+        config: channelForm,
+        connectedAt: new Date().toISOString().split('T')[0],
+        lastActivity: 'Just now',
+        messagesCount: 0,
+      }
+      setChannels(prev => [...prev, newChannel])
+      showStatus(`${channelName} connected successfully`)
+    }
+    setChannelDialog(false)
+    setSelectedPlatform(null)
+    setChannelSettingsId(null)
+  }
+
+  const handleDeleteChannel = (id: string) => {
+    setChannels(prev => prev.filter(c => c.id !== id))
+    showStatus('Channel removed')
+  }
+
+  const handleToggleChannelStatus = (id: string) => {
+    setChannels(prev => prev.map(c => c.id === id ? { ...c, status: c.status === 'connected' ? 'disconnected' : 'connected' } : c))
+    const ch = channels.find(c => c.id === id)
+    showStatus(ch?.status === 'connected' ? 'Channel disconnected' : 'Channel connected')
+  }
+
+  const handleTestConnection = async (id: string) => {
+    setChannelTestLoading(true)
+    await new Promise(r => setTimeout(r, 1500))
+    setChannels(prev => prev.map(c => c.id === id ? { ...c, status: 'connected', lastActivity: 'Just now' } : c))
+    showStatus('Connection test successful')
+    setChannelTestLoading(false)
+  }
+
+  const handleCopyWebhook = (url: string) => {
+    navigator.clipboard.writeText(url)
+    showStatus('Webhook URL copied to clipboard', 'info')
+  }
+
   // Filtered data
   const filteredOrders = orders.filter(o => orderFilter === 'all' || o.status === orderFilter)
   const filteredConvUsers = mockUsers.filter(u => {
+    if (convChannelFilter !== 'all') {
+      if (u.channelId !== convChannelFilter) return false
+    }
     if (convFilter === 'active') return !botPausedMap[u.id]
     if (convFilter === 'paused') return botPausedMap[u.id]
     if (convFilter === 'unread') return u.unread > 0
     return true
   })
+
+  const channelConvStats = [
+    { id: 'all', label: 'All Channels', count: mockUsers.length, platform: undefined as PlatformConfig | undefined },
+    ...channels.map(ch => ({
+      id: ch.id,
+      label: ch.name,
+      count: mockUsers.filter(u => u.channelId === ch.id).length,
+      platform: platformConfigs.find(p => p.platform === ch.platform),
+    })),
+  ]
   const selectedUser = mockUsers.find(u => u.id === selectedUserId)
   const selectedMessages = selectedUserId ? (conversationMessages[selectedUserId] || []) : []
   const pendingOrders = orders.filter(o => o.status === 'pending')
@@ -483,6 +589,7 @@ export default function Page() {
     { key: 'users', label: 'Users', icon: <Users size={20} /> },
     { key: 'broadcast', label: 'Broadcast', icon: <Send size={20} /> },
     { key: 'analytics', label: 'Analytics', icon: <BarChart3 size={20} /> },
+    { key: 'channels', label: 'Channels', icon: <Globe size={20} /> },
   ]
 
   const stockBadge = (stock: number) => {
@@ -646,9 +753,17 @@ export default function Page() {
                           <AvatarFallback style={{ backgroundColor: theme.accent + '30', color: theme.accent, fontSize: '11px', fontWeight: 600 }}>{user.avatar}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-1">
                             <span className="text-sm font-medium truncate">{user.name}</span>
-                            <span className="text-[11px] shrink-0" style={{ color: theme.mutedFg }}>{user.timestamp}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              {(() => {
+                                const info = getChannelInfo(user.channelId)
+                                return info?.platform ? (
+                                  <span className="text-[9px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: info.platform.color + '15', color: info.platform.color }}>{info.platform.icon}</span>
+                                ) : null
+                              })()}
+                              <span className="text-[11px]" style={{ color: theme.mutedFg }}>{user.timestamp}</span>
+                            </div>
                           </div>
                           <p className="text-xs truncate mt-0.5" style={{ color: theme.mutedFg }}>{user.lastMessage}</p>
                         </div>
@@ -731,22 +846,55 @@ export default function Page() {
             <div className="h-full flex gap-0 -m-6">
               {/* Left: User List */}
               <div className="w-80 shrink-0 flex flex-col h-full" style={{ borderRight: `1px solid ${theme.border}` }}>
-                <div className="p-4 space-y-3" style={{ borderBottom: `1px solid ${theme.border}` }}>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: theme.input }}>
-                    <Search size={16} style={{ color: theme.mutedFg }} />
-                    <input type="text" placeholder="Search conversations..." className="bg-transparent border-none outline-none text-sm flex-1" style={{ color: theme.fg }} />
+                <div className="flex flex-col" style={{ borderBottom: `1px solid ${theme.border}` }}>
+                  {/* Channel Filter Tabs */}
+                  <div className="px-3 pt-3 pb-2">
+                    <ScrollArea className="w-full">
+                      <div className="flex gap-1.5 pb-1">
+                        {channelConvStats.map(ch => {
+                          const pc = ch.platform
+                          return (
+                            <button key={ch.id} onClick={() => { setConvChannelFilter(ch.id); setSelectedUserId(null) }}
+                              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors shrink-0"
+                              style={{
+                                backgroundColor: convChannelFilter === ch.id ? (pc?.color || theme.accent) + '20' : theme.secondary,
+                                color: convChannelFilter === ch.id ? (pc?.color || theme.accent) : theme.mutedFg,
+                                border: `1px solid ${convChannelFilter === ch.id ? (pc?.color || theme.accent) + '40' : 'transparent'}`,
+                              }}>
+                              {ch.id === 'all' ? (
+                                <MessageSquare size={12} />
+                              ) : (
+                                <span className="text-[9px] font-bold" style={{ color: pc?.color || theme.accent }}>{pc?.icon || '?'}</span>
+                              )}
+                              {ch.label}
+                              <span className="text-[10px] px-1 rounded-full" style={{
+                                backgroundColor: convChannelFilter === ch.id ? (pc?.color || theme.accent) + '15' : theme.muted,
+                                color: convChannelFilter === ch.id ? (pc?.color || theme.accent) : theme.mutedFg,
+                              }}>{ch.count}</span>
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </ScrollArea>
                   </div>
-                  <div className="flex gap-1">
-                    {['all', 'active', 'paused', 'unread'].map(f => (
-                      <button key={f} onClick={() => setConvFilter(f)}
-                        className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
-                        style={{
-                          backgroundColor: convFilter === f ? theme.accent + '20' : 'transparent',
-                          color: convFilter === f ? theme.accent : theme.mutedFg
-                        }}>
-                        {f === 'all' ? 'All' : f === 'active' ? 'Bot Active' : f === 'paused' ? 'Bot Paused' : 'Unread'}
-                      </button>
-                    ))}
+                  {/* Search and Status Filters */}
+                  <div className="px-4 pb-3 space-y-3">
+                    <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{ backgroundColor: theme.input }}>
+                      <Search size={16} style={{ color: theme.mutedFg }} />
+                      <input type="text" placeholder="Search conversations..." className="bg-transparent border-none outline-none text-sm flex-1" style={{ color: theme.fg }} />
+                    </div>
+                    <div className="flex gap-1">
+                      {['all', 'active', 'paused', 'unread'].map(f => (
+                        <button key={f} onClick={() => setConvFilter(f)}
+                          className="px-3 py-1.5 rounded-md text-xs font-medium transition-colors"
+                          style={{
+                            backgroundColor: convFilter === f ? theme.accent + '20' : 'transparent',
+                            color: convFilter === f ? theme.accent : theme.mutedFg
+                          }}>
+                          {f === 'all' ? 'All' : f === 'active' ? 'Bot Active' : f === 'paused' ? 'Bot Paused' : 'Unread'}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <ScrollArea className="flex-1">
@@ -768,6 +916,15 @@ export default function Page() {
                             <span className="text-[10px] shrink-0" style={{ color: theme.mutedFg }}>{user.timestamp}</span>
                           </div>
                           <p className="text-xs truncate mt-0.5" style={{ color: theme.mutedFg }}>{user.lastMessage}</p>
+                          {(() => {
+                            const info = getChannelInfo(user.channelId)
+                            if (!info) return null
+                            return (
+                              <span className="text-[9px] font-medium mt-0.5 flex items-center gap-1" style={{ color: info.platform?.color || theme.mutedFg }}>
+                                {info.platform?.icon || '?'} {info.channel.name}
+                              </span>
+                            )
+                          })()}
                         </div>
                         {user.unread > 0 && (
                           <span className="w-5 h-5 text-[10px] flex items-center justify-center rounded-full shrink-0" style={{ backgroundColor: theme.accent, color: theme.bg, fontWeight: 700 }}>{user.unread}</span>
@@ -793,6 +950,15 @@ export default function Page() {
                           <p className="text-xs" style={{ color: theme.mutedFg }}>
                             {botPausedMap[selectedUserId] ? 'Bot Paused - Manual Mode' : 'Bot Active'}
                           </p>
+                          {(() => {
+                            const info = getChannelInfo(selectedUser.channelId)
+                            if (!info) return null
+                            return (
+                              <span className="text-[10px] flex items-center gap-1" style={{ color: info.platform?.color || theme.mutedFg }}>
+                                via {info.platform?.icon} {info.channel.name}
+                              </span>
+                            )
+                          })()}
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
