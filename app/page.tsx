@@ -67,12 +67,12 @@ const theme = {
 }
 
 // ============ TYPES ============
-type ScreenType = 'dashboard' | 'conversations' | 'products' | 'orders' | 'users' | 'broadcast' | 'analytics'
+type ScreenType = 'dashboard' | 'conversations' | 'products' | 'orders' | 'users' | 'broadcast' | 'analytics' | 'channels'
 
 interface MockUser {
   id: string; name: string; avatar: string; lastMessage: string; timestamp: string
   unread: number; botActive: boolean; totalOrders: number; totalSpent: number
-  lastActive: string; segments: string[]
+  lastActive: string; segments: string[]; channelId: string
 }
 
 interface MockMessage {
@@ -96,16 +96,37 @@ interface MockBroadcast {
 
 interface StatusMsg { text: string; type: 'success' | 'error' | 'info' }
 
+type PlatformType = 'line' | 'facebook' | 'tiktok' | 'lazada'
+
+interface PlatformConfig {
+  platform: PlatformType
+  label: string
+  icon: string
+  color: string
+  fields: { key: string; label: string; type: 'text' | 'password'; placeholder: string; required: boolean; helpText?: string }[]
+}
+
+interface ConnectedChannel {
+  id: string
+  platform: PlatformType
+  name: string
+  status: 'connected' | 'disconnected' | 'error'
+  config: Record<string, string>
+  connectedAt: string
+  lastActivity?: string
+  messagesCount?: number
+}
+
 // ============ MOCK DATA ============
 const mockUsers: MockUser[] = [
-  { id: 'u1', name: 'Somchai W.', avatar: 'SW', lastMessage: 'Do you have wireless earbuds?', timestamp: '2 min ago', unread: 3, botActive: true, totalOrders: 8, totalSpent: 15400, lastActive: '2 min ago', segments: ['VIP', 'Active'] },
-  { id: 'u2', name: 'Nattaporn K.', avatar: 'NK', lastMessage: 'I want to track my order #1042', timestamp: '5 min ago', unread: 1, botActive: false, totalOrders: 3, totalSpent: 4200, lastActive: '5 min ago', segments: ['Active'] },
-  { id: 'u3', name: 'Priya S.', avatar: 'PS', lastMessage: 'Thanks for the recommendation!', timestamp: '15 min ago', unread: 0, botActive: true, totalOrders: 12, totalSpent: 28900, lastActive: '15 min ago', segments: ['VIP', 'Active'] },
-  { id: 'u4', name: 'Tanawat R.', avatar: 'TR', lastMessage: 'Can I return the scarf?', timestamp: '1 hr ago', unread: 2, botActive: false, totalOrders: 2, totalSpent: 1800, lastActive: '1 hr ago', segments: ['New'] },
-  { id: 'u5', name: 'Kannika M.', avatar: 'KM', lastMessage: 'What flavors of tea do you have?', timestamp: '2 hr ago', unread: 0, botActive: true, totalOrders: 5, totalSpent: 7600, lastActive: '2 hr ago', segments: ['Active'] },
-  { id: 'u6', name: 'Araya P.', avatar: 'AP', lastMessage: 'Is the face cream suitable for sensitive skin?', timestamp: '3 hr ago', unread: 0, botActive: true, totalOrders: 1, totalSpent: 890, lastActive: '3 hr ago', segments: ['New'] },
-  { id: 'u7', name: 'Wichai L.', avatar: 'WL', lastMessage: 'I need a laptop stand for my desk', timestamp: '5 hr ago', unread: 0, botActive: true, totalOrders: 15, totalSpent: 42300, lastActive: '5 hr ago', segments: ['VIP'] },
-  { id: 'u8', name: 'Supatra N.', avatar: 'SN', lastMessage: 'Do you ship to Chiang Mai?', timestamp: '1 day ago', unread: 0, botActive: true, totalOrders: 0, totalSpent: 0, lastActive: '1 day ago', segments: ['Inactive'] },
+  { id: 'u1', name: 'Somchai W.', avatar: 'SW', lastMessage: 'Do you have wireless earbuds?', timestamp: '2 min ago', unread: 3, botActive: true, totalOrders: 8, totalSpent: 15400, lastActive: '2 min ago', segments: ['VIP', 'Active'], channelId: 'ch1' },
+  { id: 'u2', name: 'Nattaporn K.', avatar: 'NK', lastMessage: 'I want to track my order #1042', timestamp: '5 min ago', unread: 1, botActive: false, totalOrders: 3, totalSpent: 4200, lastActive: '5 min ago', segments: ['Active'], channelId: 'ch1' },
+  { id: 'u3', name: 'Priya S.', avatar: 'PS', lastMessage: 'Thanks for the recommendation!', timestamp: '15 min ago', unread: 0, botActive: true, totalOrders: 12, totalSpent: 28900, lastActive: '15 min ago', segments: ['VIP', 'Active'], channelId: 'ch2' },
+  { id: 'u4', name: 'Tanawat R.', avatar: 'TR', lastMessage: 'Can I return the scarf?', timestamp: '1 hr ago', unread: 2, botActive: false, totalOrders: 2, totalSpent: 1800, lastActive: '1 hr ago', segments: ['New'], channelId: 'ch3' },
+  { id: 'u5', name: 'Kannika M.', avatar: 'KM', lastMessage: 'What flavors of tea do you have?', timestamp: '2 hr ago', unread: 0, botActive: true, totalOrders: 5, totalSpent: 7600, lastActive: '2 hr ago', segments: ['Active'], channelId: 'ch1' },
+  { id: 'u6', name: 'Araya P.', avatar: 'AP', lastMessage: 'Is the face cream suitable for sensitive skin?', timestamp: '3 hr ago', unread: 0, botActive: true, totalOrders: 1, totalSpent: 890, lastActive: '3 hr ago', segments: ['New'], channelId: 'ch2' },
+  { id: 'u7', name: 'Wichai L.', avatar: 'WL', lastMessage: 'I need a laptop stand for my desk', timestamp: '5 hr ago', unread: 0, botActive: true, totalOrders: 15, totalSpent: 42300, lastActive: '5 hr ago', segments: ['VIP'], channelId: 'ch3' },
+  { id: 'u8', name: 'Supatra N.', avatar: 'SN', lastMessage: 'Do you ship to Chiang Mai?', timestamp: '1 day ago', unread: 0, botActive: true, totalOrders: 0, totalSpent: 0, lastActive: '1 day ago', segments: ['Inactive'], channelId: 'ch1' },
 ]
 
 const mockConversations: Record<string, MockMessage[]> = {
@@ -181,6 +202,54 @@ const userGrowthData = Array.from({ length: 30 }, (_, i) => ({
 }))
 
 const weeklyRevenueData = revenueData.slice(0, 7)
+
+// ============ PLATFORM CONFIGS ============
+const platformConfigs: PlatformConfig[] = [
+  {
+    platform: 'line', label: 'LINE Official Account', icon: 'LINE', color: '#06C755',
+    fields: [
+      { key: 'channelId', label: 'Channel ID', type: 'text', placeholder: 'e.g. 1234567890', required: true, helpText: 'Found in LINE Developers Console > Basic Settings' },
+      { key: 'channelSecret', label: 'Channel Secret', type: 'password', placeholder: 'e.g. a1b2c3d4e5f6...', required: true, helpText: 'Found in LINE Developers Console > Basic Settings' },
+      { key: 'channelAccessToken', label: 'Channel Access Token', type: 'password', placeholder: 'Long-lived channel access token', required: true, helpText: 'Issue from LINE Developers Console > Messaging API' },
+      { key: 'webhookUrl', label: 'Webhook URL', type: 'text', placeholder: 'https://your-domain.com/api/webhook/line', required: true, helpText: 'Set this URL in LINE Developers Console > Messaging API > Webhook settings' },
+    ],
+  },
+  {
+    platform: 'facebook', label: 'Facebook Messenger', icon: 'FB', color: '#1877F2',
+    fields: [
+      { key: 'pageId', label: 'Page ID', type: 'text', placeholder: 'e.g. 123456789012345', required: true, helpText: 'Found in Facebook Page Settings > Page ID' },
+      { key: 'appId', label: 'App ID', type: 'text', placeholder: 'e.g. 123456789012345', required: true, helpText: 'Found in Meta for Developers > Settings > Basic' },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: 'Your app secret key', required: true, helpText: 'Found in Meta for Developers > Settings > Basic' },
+      { key: 'pageAccessToken', label: 'Page Access Token', type: 'password', placeholder: 'Long-lived page access token', required: true, helpText: 'Generate from Meta for Developers > Messenger > Settings' },
+      { key: 'verifyToken', label: 'Webhook Verify Token', type: 'text', placeholder: 'Custom verify token string', required: true, helpText: 'A custom string you define for webhook verification' },
+    ],
+  },
+  {
+    platform: 'tiktok', label: 'TikTok Shop', icon: 'TT', color: '#000000',
+    fields: [
+      { key: 'appId', label: 'App ID', type: 'text', placeholder: 'TikTok Shop App ID', required: true, helpText: 'Found in TikTok Shop Partner Center > App Management' },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: 'TikTok Shop App Secret', required: true, helpText: 'Found in TikTok Shop Partner Center > App Management' },
+      { key: 'accessToken', label: 'Access Token', type: 'password', placeholder: 'Shop access token', required: true, helpText: 'Generated via TikTok Shop OAuth flow' },
+      { key: 'shopId', label: 'Shop ID', type: 'text', placeholder: 'e.g. 7123456789012345678', required: false, helpText: 'Your TikTok Shop ID (optional for multi-shop setup)' },
+    ],
+  },
+  {
+    platform: 'lazada', label: 'Lazada Seller Center', icon: 'LZ', color: '#0F146D',
+    fields: [
+      { key: 'appKey', label: 'App Key', type: 'text', placeholder: 'Lazada Open Platform App Key', required: true, helpText: 'Found in Lazada Open Platform > App Management' },
+      { key: 'appSecret', label: 'App Secret', type: 'password', placeholder: 'Lazada Open Platform App Secret', required: true, helpText: 'Found in Lazada Open Platform > App Management' },
+      { key: 'accessToken', label: 'Access Token', type: 'password', placeholder: 'Seller access token', required: true, helpText: 'Generated via Lazada OAuth authorization flow' },
+      { key: 'region', label: 'Region', type: 'text', placeholder: 'e.g. TH, MY, SG, ID, PH, VN', required: true, helpText: 'Country code for your Lazada seller account' },
+      { key: 'sellerId', label: 'Seller ID', type: 'text', placeholder: 'e.g. 200012345678', required: false, helpText: 'Your Lazada Seller Center ID' },
+    ],
+  },
+]
+
+const initialChannels: ConnectedChannel[] = [
+  { id: 'ch1', platform: 'line', name: 'Main Store OA', status: 'connected', config: { channelId: '1656789012', channelSecret: '********', channelAccessToken: '********', webhookUrl: 'https://api.example.com/webhook/line/main' }, connectedAt: '2026-01-15', lastActivity: '2 min ago', messagesCount: 3421 },
+  { id: 'ch2', platform: 'line', name: 'Promo Channel', status: 'connected', config: { channelId: '1656789099', channelSecret: '********', channelAccessToken: '********', webhookUrl: 'https://api.example.com/webhook/line/promo' }, connectedAt: '2026-02-01', lastActivity: '1 hr ago', messagesCount: 872 },
+  { id: 'ch3', platform: 'facebook', name: 'Shop Facebook Page', status: 'disconnected', config: { pageId: '123456789012345', appId: '987654321098765', appSecret: '********', pageAccessToken: '********', verifyToken: 'myverifytoken123' }, connectedAt: '2026-02-10', lastActivity: '3 days ago', messagesCount: 156 },
+]
 
 // ============ MAIN COMPONENT ============
 export default function Page() {
@@ -1731,6 +1800,341 @@ Colors: Silver, Black
                   </CardContent>
                 </Card>
               </div>
+            </div>
+          )}
+
+          {/* ===== CHANNELS ===== */}
+          {activeScreen === 'channels' && (
+            <div className="space-y-6 max-w-7xl mx-auto">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold">Channels</h1>
+                  <p className="text-sm mt-1" style={{ color: theme.mutedFg }}>
+                    Connect and manage external chat platforms to centralize all customer conversations
+                  </p>
+                </div>
+                <Button onClick={openAddChannel} style={{ backgroundColor: theme.accent, color: theme.bg }}>
+                  <Plus size={16} className="mr-2" /> Add Channel
+                </Button>
+              </div>
+
+              {/* Connected Channels Summary */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {platformConfigs.map(pc => {
+                  const count = channelsByPlatform(pc.platform).length
+                  const connected = channelsByPlatform(pc.platform).filter(c => c.status === 'connected').length
+                  return (
+                    <Card key={pc.platform} className="border-0 cursor-pointer transition-colors"
+                      style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}
+                      onClick={() => { if (count === 0) { setSelectedPlatform(pc.platform); setChannelForm({}); setChannelName(''); setChannelSettingsId(null); setShowSecrets({}); setChannelDialog(true) } }}>
+                      <CardContent className="pt-5 pb-4 px-5">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold"
+                            style={{ backgroundColor: pc.color + '20', color: pc.color }}>
+                            {pc.icon}
+                          </div>
+                          {count > 0 ? (
+                            <Badge style={{ backgroundColor: connected > 0 ? theme.chart2 + '20' : theme.destructive + '20', color: connected > 0 ? theme.chart2 : theme.destructive }} className="text-[10px]">
+                              {connected}/{count} Active
+                            </Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-[10px]" style={{ borderColor: theme.border, color: theme.mutedFg }}>
+                              Not Connected
+                            </Badge>
+                          )}
+                        </div>
+                        <p className="text-sm font-semibold">{pc.label}</p>
+                        <p className="text-xs mt-0.5" style={{ color: theme.mutedFg }}>
+                          {count > 0 ? `${count} channel${count !== 1 ? 's' : ''} configured` : 'Click to connect'}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
+
+              {/* All Connected Channels */}
+              {channels.length > 0 ? (
+                <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                  <CardHeader className="pb-3">
+                    <div className="flex items-center justify-between">
+                      <CardTitle className="text-base font-semibold">Connected Channels</CardTitle>
+                      <span className="text-xs" style={{ color: theme.mutedFg }}>
+                        {channels.filter(c => c.status === 'connected').length} of {channels.length} active
+                      </span>
+                    </div>
+                  </CardHeader>
+                  <CardContent className="space-y-3 px-4 pb-4">
+                    {channels.map(channel => {
+                      const pc = platformConfigs.find(p => p.platform === channel.platform)
+                      return (
+                        <div key={channel.id} className="flex items-center justify-between p-4 rounded-xl transition-colors"
+                          style={{ backgroundColor: theme.secondary }}>
+                          <div className="flex items-center gap-4 min-w-0 flex-1">
+                            <div className="w-11 h-11 rounded-xl flex items-center justify-center text-xs font-bold shrink-0"
+                              style={{ backgroundColor: (pc?.color || theme.accent) + '20', color: pc?.color || theme.accent }}>
+                              {pc?.icon || '??'}
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <span className="text-sm font-semibold truncate">{channel.name}</span>
+                                <span className="flex items-center gap-1">
+                                  {channel.status === 'connected' ? (
+                                    <Wifi size={12} style={{ color: theme.chart2 }} />
+                                  ) : channel.status === 'error' ? (
+                                    <AlertCircle size={12} style={{ color: theme.destructive }} />
+                                  ) : (
+                                    <WifiOff size={12} style={{ color: theme.mutedFg }} />
+                                  )}
+                                  <span className="text-[10px] font-medium" style={{
+                                    color: channel.status === 'connected' ? theme.chart2 : channel.status === 'error' ? theme.destructive : theme.mutedFg
+                                  }}>
+                                    {channel.status === 'connected' ? 'Connected' : channel.status === 'error' ? 'Error' : 'Disconnected'}
+                                  </span>
+                                </span>
+                              </div>
+                              <div className="flex items-center gap-3 mt-1">
+                                <span className="text-[11px]" style={{ color: theme.mutedFg }}>{pc?.label}</span>
+                                {channel.lastActivity && (
+                                  <>
+                                    <span className="text-[10px]" style={{ color: theme.border }}>|</span>
+                                    <span className="text-[11px]" style={{ color: theme.mutedFg }}>Last active: {channel.lastActivity}</span>
+                                  </>
+                                )}
+                                {channel.messagesCount !== undefined && (
+                                  <>
+                                    <span className="text-[10px]" style={{ color: theme.border }}>|</span>
+                                    <span className="text-[11px]" style={{ color: theme.mutedFg }}>{channel.messagesCount.toLocaleString()} messages</span>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 ml-4">
+                            <Button size="sm" variant="ghost" onClick={() => handleTestConnection(channel.id)}
+                              disabled={channelTestLoading}
+                              style={{ color: theme.accent, height: '32px', fontSize: '12px' }}>
+                              {channelTestLoading ? <Loader2 size={14} className="mr-1 animate-spin" /> : <RefreshCw size={14} className="mr-1" />}
+                              Test
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => handleToggleChannelStatus(channel.id)}
+                              style={{ color: channel.status === 'connected' ? theme.mutedFg : theme.chart2, height: '32px', fontSize: '12px' }}>
+                              {channel.status === 'connected' ? <WifiOff size={14} className="mr-1" /> : <Wifi size={14} className="mr-1" />}
+                              {channel.status === 'connected' ? 'Disconnect' : 'Connect'}
+                            </Button>
+                            <Button size="sm" variant="ghost" onClick={() => openChannelSettings(channel)}
+                              style={{ color: theme.accent, height: '32px', fontSize: '12px' }}>
+                              <Settings size={14} className="mr-1" /> Settings
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button size="sm" variant="ghost" style={{ color: theme.destructive, height: '32px', width: '32px', padding: 0 }}>
+                                  <Trash2 size={14} />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent style={{ backgroundColor: theme.card, borderColor: theme.border }}>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Remove {channel.name}?</AlertDialogTitle>
+                                  <AlertDialogDescription style={{ color: theme.mutedFg }}>
+                                    This will disconnect and remove this channel. You will stop receiving messages from this channel. This action cannot be undone.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel style={{ borderColor: theme.border, color: theme.fg }}>Cancel</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteChannel(channel.id)} style={{ backgroundColor: theme.destructive, color: '#fff' }}>Remove Channel</AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </CardContent>
+                </Card>
+              ) : (
+                <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                  <CardContent className="py-16">
+                    <div className="flex flex-col items-center justify-center space-y-3">
+                      <Unplug size={48} style={{ color: theme.muted }} />
+                      <p className="text-base font-medium">No channels connected</p>
+                      <p className="text-sm text-center max-w-sm" style={{ color: theme.mutedFg }}>
+                        Connect your first channel to start receiving and managing customer conversations from external platforms.
+                      </p>
+                      <Button onClick={openAddChannel} style={{ backgroundColor: theme.accent, color: theme.bg }} className="mt-2">
+                        <Plus size={16} className="mr-2" /> Add Your First Channel
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Setup Guide */}
+              <Card className="border-0" style={{ backgroundColor: theme.card, borderRadius: '0.75rem' }}>
+                <CardHeader className="pb-3">
+                  <div className="flex items-center gap-3">
+                    <span className="p-2.5 rounded-lg" style={{ backgroundColor: theme.chart5 + '20' }}>
+                      <Info size={20} style={{ color: theme.chart5 }} />
+                    </span>
+                    <div>
+                      <CardTitle className="text-base font-semibold">How Channel Integration Works</CardTitle>
+                      <CardDescription style={{ color: theme.mutedFg }}>
+                        Connect platforms to route all customer messages through your AI sales bot
+                      </CardDescription>
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-6 text-xs overflow-x-auto pb-2">
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Globe size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>Connect platform channel</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Link2 size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>Configure API keys and webhook</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><Bot size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>AI bot handles incoming messages</span>
+                    </div>
+                    <ChevronRight size={16} style={{ color: theme.accent }} className="shrink-0" />
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="p-1.5 rounded" style={{ backgroundColor: theme.accent + '20' }}><MessageSquare size={14} style={{ color: theme.accent }} /></span>
+                      <span style={{ color: theme.mutedFg }}>View all in Conversations tab</span>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Add/Edit Channel Dialog */}
+              <Dialog open={channelDialog} onOpenChange={setChannelDialog}>
+                <DialogContent style={{ backgroundColor: theme.card, borderColor: theme.border }} className="max-w-lg max-h-[90vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>{channelSettingsId ? 'Channel Settings' : 'Add New Channel'}</DialogTitle>
+                    <DialogDescription style={{ color: theme.mutedFg }}>
+                      {channelSettingsId ? 'Update your channel configuration' : 'Select a platform and configure the connection'}
+                    </DialogDescription>
+                  </DialogHeader>
+
+                  {/* Platform Selection (only for new channels) */}
+                  {!channelSettingsId && !selectedPlatform && (
+                    <div className="space-y-3 py-2">
+                      <Label className="text-xs font-medium" style={{ color: theme.mutedFg }}>Select Platform</Label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {platformConfigs.map(pc => (
+                          <button key={pc.platform} onClick={() => handleSelectPlatform(pc.platform)}
+                            className="flex items-center gap-3 p-4 rounded-xl text-left transition-all"
+                            style={{
+                              backgroundColor: theme.secondary,
+                              border: `1px solid ${theme.border}`,
+                            }}
+                            onMouseEnter={e => { e.currentTarget.style.borderColor = pc.color; e.currentTarget.style.backgroundColor = pc.color + '10' }}
+                            onMouseLeave={e => { e.currentTarget.style.borderColor = theme.border; e.currentTarget.style.backgroundColor = theme.secondary }}>
+                            <div className="w-10 h-10 rounded-lg flex items-center justify-center text-xs font-bold shrink-0"
+                              style={{ backgroundColor: pc.color + '20', color: pc.color }}>
+                              {pc.icon}
+                            </div>
+                            <div>
+                              <p className="text-sm font-semibold">{pc.label}</p>
+                              <p className="text-[11px] mt-0.5" style={{ color: theme.mutedFg }}>
+                                {channelsByPlatform(pc.platform).length} connected
+                              </p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Platform Config Form */}
+                  {selectedPlatform && currentPlatformConfig && (
+                    <div className="space-y-4 py-2">
+                      {/* Platform Header */}
+                      <div className="flex items-center gap-3 p-3 rounded-lg" style={{ backgroundColor: theme.secondary }}>
+                        <div className="w-9 h-9 rounded-lg flex items-center justify-center text-xs font-bold"
+                          style={{ backgroundColor: currentPlatformConfig.color + '20', color: currentPlatformConfig.color }}>
+                          {currentPlatformConfig.icon}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm font-semibold">{currentPlatformConfig.label}</p>
+                          <p className="text-[11px]" style={{ color: theme.mutedFg }}>
+                            {channelSettingsId ? 'Editing configuration' : 'New channel setup'}
+                          </p>
+                        </div>
+                        {!channelSettingsId && (
+                          <Button size="sm" variant="ghost" onClick={() => setSelectedPlatform(null)}
+                            style={{ color: theme.mutedFg, height: '28px', fontSize: '11px' }}>
+                            <ChevronLeft size={14} className="mr-1" /> Back
+                          </Button>
+                        )}
+                      </div>
+
+                      {/* Channel Name */}
+                      <div className="space-y-1.5">
+                        <Label className="text-xs">Channel Name <span style={{ color: theme.destructive }}>*</span></Label>
+                        <Input value={channelName} onChange={e => setChannelName(e.target.value)}
+                          placeholder="e.g. Main Store, Promo Channel"
+                          className="border-0 text-sm" style={{ backgroundColor: theme.input, color: theme.fg }} />
+                        <p className="text-[10px]" style={{ color: theme.mutedFg }}>A friendly name to identify this channel</p>
+                      </div>
+
+                      <Separator style={{ backgroundColor: theme.border }} />
+
+                      {/* Dynamic Fields */}
+                      {currentPlatformConfig.fields.map(field => (
+                        <div key={field.key} className="space-y-1.5">
+                          <div className="flex items-center justify-between">
+                            <Label className="text-xs">
+                              {field.label} {field.required && <span style={{ color: theme.destructive }}>*</span>}
+                            </Label>
+                            {field.type === 'password' && (
+                              <button onClick={() => setShowSecrets(prev => ({ ...prev, [field.key]: !prev[field.key] }))}
+                                className="text-[10px] px-2 py-0.5 rounded" style={{ color: theme.accent }}>
+                                {showSecrets[field.key] ? 'Hide' : 'Show'}
+                              </button>
+                            )}
+                          </div>
+                          <div className="relative">
+                            <Input
+                              type={field.type === 'password' && !showSecrets[field.key] ? 'password' : 'text'}
+                              value={channelForm[field.key] || ''}
+                              onChange={e => setChannelForm(prev => ({ ...prev, [field.key]: e.target.value }))}
+                              placeholder={field.placeholder}
+                              className="border-0 text-sm pr-10"
+                              style={{ backgroundColor: theme.input, color: theme.fg }}
+                            />
+                            {field.key === 'webhookUrl' && channelForm[field.key] && (
+                              <button onClick={() => handleCopyWebhook(channelForm[field.key])}
+                                className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded"
+                                style={{ color: theme.mutedFg }}>
+                                <Copy size={14} />
+                              </button>
+                            )}
+                          </div>
+                          {field.helpText && (
+                            <p className="text-[10px] leading-relaxed" style={{ color: theme.mutedFg }}>{field.helpText}</p>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedPlatform && (
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="outline" style={{ borderColor: theme.border, color: theme.fg }}>Cancel</Button>
+                      </DialogClose>
+                      <Button onClick={handleSaveChannel} disabled={!channelName.trim()}
+                        style={{ backgroundColor: theme.accent, color: theme.bg }}>
+                        <Check size={14} className="mr-1.5" />
+                        {channelSettingsId ? 'Save Changes' : 'Connect Channel'}
+                      </Button>
+                    </DialogFooter>
+                  )}
+                </DialogContent>
+              </Dialog>
             </div>
           )}
         </main>
